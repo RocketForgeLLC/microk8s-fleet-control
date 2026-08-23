@@ -1,9 +1,7 @@
 # MicroK8s Fleet Control
 
 Portable Kubernetes node-maintenance platform. The controller runs in the
-target cluster; host agents run as systemd services on cluster members. The
-platform does not require Codex, Endpoint Central, SSH, or a vendor-specific
-control plane at runtime.
+target cluster; host agents run as systemd services on cluster members.
 
 ## Deploy
 
