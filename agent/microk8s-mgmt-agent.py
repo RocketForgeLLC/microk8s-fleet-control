@@ -227,6 +227,25 @@ def publish_current(result):
     write_json(STATE_DIR / "current.json", result)
     report_status()
 
+def reconcile_current():
+    """Remove an operation marker left behind by a terminated agent process."""
+    path = STATE_DIR / "current.json"
+    current = read_json(path, None)
+    if not current:
+        return
+    owner_pid = current.get("pid")
+    active = current.get("id") in ACTIVE_JOBS
+    if owner_pid != os.getpid() or not active:
+        current["status"] = "failed"
+        current["phase"] = "interrupted"
+        current["error"] = "operation interrupted when the management agent stopped"
+        current["finished"] = time.time()
+        write_json(STATE_DIR / "last.json", current)
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            pass
+
 def run_operation(operation, channel=None, external_id=None):
     if operation == "microk8s-upgrade":
         if not channel or "/" not in channel:
@@ -245,7 +264,7 @@ def run_operation(operation, channel=None, external_id=None):
     started = time.time()
     log_path = LOG_DIR / f"{job_id}.log"
     result = {"id": job_id, "node": NODE_NAME, "operation": operation, "channel": channel,
-              "started": started, "command": command, "status": "running",
+              "started": started, "pid": os.getpid(), "command": command, "status": "running",
               "phase": "preparing", "logPath": str(log_path)}
     write_json(STATE_DIR / "current.json", result)
     LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -323,6 +342,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == "/v1/status":
+            reconcile_current()
             current = read_json(STATE_DIR / "current.json", None)
             last = read_json(STATE_DIR / "last.json", None)
             self.respond(200, {"node": NODE_NAME, "agentVersion": AGENT_VERSION,
