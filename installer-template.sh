@@ -28,7 +28,8 @@ install -d -m 0750 "$TMP_DIR" "$INSTALL_DIR" "$CERT_DIR" /var/lib/microk8s-mgmt-
 for file in microk8s-mgmt-agent.py update_manager.py microk8s-mgmt-agent.service microk8s-mgmt-agent.default; do
   curl -fsSL "$BUNDLE_PROXY/api/agent/bundle/$file" -o "$TMP_DIR/$file"
 done
-curl -fsSL "$MGMT_CONSOLE/api/agent/update/public-key" -o "$TMP_DIR/update-public.pem" || true
+UPDATE_PUBLIC_KEY_URL="${REPORT_URL%/api/agent/status}/api/agent/update/public-key"
+curl -fsSL "$UPDATE_PUBLIC_KEY_URL" -o "$TMP_DIR/update-public.pem" || true
 install -m 0750 "$TMP_DIR/microk8s-mgmt-agent.py" "$INSTALL_DIR/microk8s-mgmt-agent.py"
 install -m 0750 "$TMP_DIR/update_manager.py" "$INSTALL_DIR/update_manager.py"
 if [[ -s "$TMP_DIR/update-public.pem" ]]; then
