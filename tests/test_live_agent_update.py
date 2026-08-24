@@ -6,8 +6,9 @@ from pathlib import Path
 
 def test_live_signed_agent_update():
     manifest = os.environ["MGMT_LIVE_MANIFEST_URL"]
+    expected = os.environ.get("MGMT_LIVE_EXPECTED_VERSION", "0.1.2")
     os.environ.update({
-        "MGMT_AGENT_VERSION": "0.1.0",
+        "MGMT_AGENT_VERSION": os.environ.get("MGMT_LIVE_CURRENT_VERSION", "0.1.1"),
         "MGMT_AGENT_CHANNEL": "stable",
         "MGMT_AGENT_UPDATE_MANIFEST_URL": manifest,
         "MGMT_AGENT_UPDATE_PUBLIC_KEY": os.environ["MGMT_LIVE_PUBLIC_KEY"],
@@ -22,7 +23,7 @@ def test_live_signed_agent_update():
         context.load_cert_chain(os.environ["MGMT_LIVE_CLIENT_CERT"], os.environ["MGMT_LIVE_CLIENT_KEY"])
         result = updater.apply_available_update(context=context)
         assert result["status"] == "installed", result
-        assert result["installedVersion"] == "0.1.1", result
+        assert result["installedVersion"] == expected, result
         assert (Path(temp_name) / "install" / "microk8s-mgmt-agent.py").is_file()
         print("live signed agent update test passed")
 
