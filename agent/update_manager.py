@@ -10,7 +10,7 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
-VERSION = os.getenv("MGMT_AGENT_VERSION", "0.1.1")
+VERSION = os.getenv("MGMT_AGENT_VERSION", "0.1.2")
 CHANNEL = os.getenv("MGMT_AGENT_CHANNEL", "stable")
 STATE_DIR = Path(os.getenv("MGMT_AGENT_STATE_DIR", "/var/lib/microk8s-mgmt-agent"))
 INSTALL_DIR = Path(os.getenv("MGMT_AGENT_INSTALL_DIR", "/usr/local/lib/microk8s-mgmt-agent"))
